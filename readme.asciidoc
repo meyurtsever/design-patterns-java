@@ -4,6 +4,28 @@
 
 == Design Patterns
 
-** https://github.com/meyurtsever/softwareDesignPatterns/blob/master/factory/singleton_factory.adoc[Singleton_Factory.pdf, role=external,window=_blank]
+** https://github.com/meyurtsever/design-patterns-java/tree/master/builder[Builder, role=external,window=_blank] =>  https://github.com/meyurtsever/design-patterns-java/blob/master/builder/builder-pattern.png[UML, role=external,window=_blank]  
 
+** https://github.com/meyurtsever/design-patterns-java/tree/master/decorator[Decorator, role=external,window=_blank] => https://github.com/meyurtsever/design-patterns-java/blob/master/decorator/decorator_uml.png[UML, role=external,window=_blank] 
 
+** https://github.com/meyurtsever/design-patterns-java/tree/master/decorator[Factory, role=external,window=_blank] =>  https://github.com/meyurtsever/design-patterns-java/blob/master/factory/factory_pattern.png[UML, role=external,window=_blank]
+
+** https://github.com/meyurtsever/design-patterns-java/tree/master/iterator[Iterator, role=external,window=_blank] =>  https://github.com/meyurtsever/design-patterns-java/blob/master/iterator/iterator_pattern.png[UML, role=external,window=_blank]
+
+** https://github.com/meyurtsever/design-patterns-java/tree/master/memento[Memento, role=external,window=_blank] =>  https://github.com/meyurtsever/design-patterns-java/blob/master/memento/memento_uml.png[UML, role=external,window=_blank]
+
+** https://github.com/meyurtsever/design-patterns-java/tree/master/object-pooling[Object pooling, role=external,window=_blank] =>  https://github.com/meyurtsever/design-patterns-java/blob/master/object-pooling/object_pool.png[UML, role=external,window=_blank]
+
+** https://github.com/meyurtsever/design-patterns-java/tree/master/observer[Observer, role=external,window=_blank] =>  https://github.com/meyurtsever/design-patterns-java/blob/master/observer/observer_pattern.png[UML, role=external,window=_blank]
+
+** https://github.com/meyurtsever/design-patterns-java/tree/master/prototype[Prototype, role=external,window=_blank] =>  https://github.com/meyurtsever/design-patterns-java/blob/master/prototype/prototoype.png[UML, role=external,window=_blank]
+
+** https://github.com/meyurtsever/design-patterns-java/tree/master/singleton[Singleton, role=external,window=_blank] =>  https://github.com/meyurtsever/design-patterns-java/blob/master/singleton/singleton_pattern.png[UML, role=external,window=_blank]
+
+** https://github.com/meyurtsever/design-patterns-java/tree/master/solid-interface-segregation[SOLID: Interface segregation, role=external,window=_blank] =>  https://github.com/meyurtsever/design-patterns-java/blob/master/solid-interface-segregation/isp.png[UML, role=external,window=_blank]
+
+== Useful Resources
+
+** https://fi.ort.edu.uy/innovaportal/file/2032/1/design_principles.pdf[Design Priciples and Design Patterns, role=external,window=_blank] by Robert C. Martin
+
+** https://refactoring.guru/design-patterns/book[Dive Into Design Patterns, role=external,window=_blank] by Alexander Shvets
