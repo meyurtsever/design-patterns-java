@@ -1,0 +1,9 @@
+= Introduction
+
+* This repository contains implementations of some of the design patterns covered in the BLM440 Software Design Patterns (Yazılım Tasarım Kalıpları) course. Both English and Turkish documentation is available for each design pattern.
+
+== Design Patterns
+
+** https://github.com/meyurtsever/softwareDesignPatterns/blob/master/factory/singleton_factory.adoc[Singleton_Factory.pdf, role=external,window=_blank]
+
+

@@ -1,0 +1,207 @@
+# SOLID Yazılım Prensipleri
+
+Nesneye yönelik programlamada geliştirilen yazılımın esnek, yeniden kullanılabilir, sürdürülebilir ve anlaşılır olmasını sağlayan, kod tekrarını önleyen tasarım prensipleridir. Robert C. Martin tarafından önerilmiştir.
+
+## 1.1. Interface segregation principle
+
+____
+İstemciye özgü (client-specific) birçok arayüz, genel amaçlı bir arayüzden daha iyidir.
+
+Birkaç istemciye sahip bir sınıfınız mevcutsa, her istemci için spesifik arayüzler oluşturun ve bunları sınıfa miras alın.
+Robert C. Martin
+____
+
+Figure 1 bir sınıf ve birden çok istemciyi göstermekte. 
+ 
+* Character arayüzü, tüm karakter türlerine hizmet vermektedir.
+
+* İlgili yapıda `FighterCharacter` sınıfının kullandığı `dealPhysicalDamage()` metodunun yapısı değiştiğinde, **bu metodu kullanan diğer iki sınıf da** ilgili değişiklikten etkilenecektir. 
+
+* İlgili değişiklik sonrası diğer sınıflara da değişiklik gerektirecek durumlar doğabilir.
+
+.ISP uygulanmamış arayüz tasarımı
+[uml,file="not_isp.png"]
+--
+@startuml
+left to right direction
+interface Character {
+    +void setDamageRatio()
+    +void dealPhysicalDamage()
+    +void dealMagicalDamage()
+    +void dealMixedDamage()
+}
+
+class FighterCharacter {
+    -double damageRatio
+    -int movementSpeed
+}
+
+class MageCharacter {
+    -double damageRatio
+    -int movementSpeed
+}
+
+class HybridCharacter {
+    -double damageRatio
+    -int movementSpeed
+}
+
+FighterCharacter..|>Character
+MageCharacter..|>Character
+HybridCharacter..|>Character
+
+@enduml
+--
+
+
+Daha iyi bir yaklaşım, Figure 2'de verilmiştir. 
+
+* Her client için gereken metotlar, o cliente özel arayüzlere yerleştirilmiştir.
+
+* Eğer Warrior'un kullandığı arayüzün değişmesi gerekirse, yapılacak değişiklikten diğer clientler etkilenmeyecek, **yeniden derlenmeyecek** ve deploy edilmeyeceklerdir.
+
+.Ayrılmış (segregated) arayüzler
+[uml,file="isp.png"]
+--
+@startuml
+left to right direction
+interface CharacterDamage {
+    +void setDamageRatio()
+}
+
+interface FighterCharacter {
+    +void dealPhysicalDamage()
+}
+
+interface MageCharacter {
+    +void dealMagicalDamage()
+}
+
+interface HybridCharacter {
+    +void dealMixedDamage()
+}
+
+class Warrior {
+    -double damageRatio
+    -int movementSpeed
+}
+
+class Mage {
+    -double damageRatio
+    -int movementSpeed
+}
+
+class Cleric {
+    -double damageRatio
+    -int movementSpeed
+}
+
+FighterCharacter --|> CharacterDamage
+MageCharacter --|> CharacterDamage
+HybridCharacter --|> CharacterDamage
+
+Warrior ..|> FighterCharacter
+Mage ..|> MageCharacter
+Cleric ..|> HybridCharacter
+
+@enduml
+--
+
+* Interface Segregation Principle (ISP), her servisin kendisine özel arayüze sahip olmasını önermez.
+
+* Bunun yerine, istemciler türlerine göre kategorilere ayrılmalı ve her bir istemci kategorisi için arayüzler oluşturulmalıdır.
+
+** İlgili örnek için `FighterCharacter` arayüzünü implement eden bir başka `Viking` sınıfı oluşturulabilir.
+
+* OOP uygulamaları geliştirildikçe, sınıfların kullandığı arayüzler sıklıkla değişir.
+
+** Bu aşamada, ilgili değişikliklerin büyük bir etkiye sahip olduğu ve tasarımın **büyük bir bölümünün yeniden derlenmesini** ve **deploy edilmesini** zorunlu kıldığı durumlar olacaktır.
+
+*** Bu etki, mevcut arayüzü değiştirmek yerine mevcut sınıflar için **yeni arayüzler oluşturularak** hafifletilebilir.
+
+### 1.1.1. ISP Uygulaması
+
+Öncelikle ISP uygulanmamış örneği inceleyip, ilgili prensibi ihlal eden noktaları belirleyelim.
+
+.Character.java
+[source,java]
+....
+public interface Character { <1>
+	void dealPhysicalDamage(); 
+	void dealMagicalDamage();
+	void dealMixedDamage(); 
+}
+....
+<1> Tüm farklı hasar türleri, tek bir arayüzde toplandı, ISP prensibi uygulanmadı.
+
+.MageCharacter.java
+[source,java]
+....
+public class MageCharacter implements Character {
+
+	@Override
+	public void dealPhysicalDamage() { <1>
+		throw new NotSupportedException();
+	}
+
+	@Override
+	public void dealMagicalDamage() { <2>
+		// mag. damage calculation...
+	}
+
+	@Override
+	public void dealMixedDamage() { <3>
+		throw new NotSupportedException();
+	}
+
+}
+....
+<1> Karakter büyücü olduğu için fiziksel saldırı gerçekleştiremez. Sınıfın ihtiyacı olmadığı bir metot implement edilmiştir. **IS prensipleri ihlal edilmiştir.**
+
+<2> Sınıfın kullanacağı metot implement edilmektedir.
+
+<3> Karakter büyücü olduğu için fiziksel saldırı gerçekleştiremez. Sınıfın ihtiyacı olmadığı bir metot implement edilmiştir. **IS prensipleri ihlal edilmiştir.**
+
+#### İlgili projenin ISP gözetilerek tekrardan düzenlenmesi
+
+.CharacterDamage.java
+[source,java]
+....
+public interface CharacterDamage {
+	void setDamageRatio(); <1>
+}
+....
+<1> Karakter türlerine göre değişen hasar türlerini hesaplayan metotlar, alt arayüzler oluşturularak ilgili arayüzlere alındı.
+
+.FighterCharacter.java
+[source,java]
+....
+public interface FighterCharacter extends CharacterDamage{
+	void dealPhysicalDamage(); <1>
+}
+....
+<1> Fighter sınıfındaki karakterler, fiziksel hasar verir. Bu sınıfa ait karakterler, ilgili arayüzü implement edecektir.
+
+.Warrior.java
+[source,java]
+....
+public class Warrior implements FighterCharacter {
+	
+	@Override
+	public void setDamageRatio() { <1>
+		// check if character uses melee weapon
+		// set it's damage ratio based on different criterias
+	}
+
+	@Override
+	public void dealPhysicalDamage() { <2>
+		// calculate phy damage with damage ratio.
+		// then deal damage.		
+	}
+}
+....
+<1> Karakter sınıfına özel hasar oranı hesaplaması gerçekleştirilir. Burada karakterin sahip olduğu silah ve hasar türü, hasar oranı hesabında değerlendirilir.
+
+<2> Hasar oranı kullanılarak karakterin verebileceği hasar hesaplanır. 
+
+* Her bir karakter sınıfı, verdikleri hasar türlerine göre arayüzlere kategorize edilmiştir. Bu şekilde ISP uygulanmış olur.

@@ -1,0 +1,193 @@
+# Structural Pattern
+
+## Decorator Design Pattern
+
+* Decorator Design Pattern, bir nesneye dinamik olarak işlevsellik ve davranış eklenmesini sağlar.
+** Aynı sınıftaki diğer nesnelerin davranışlarını etkilemez.
+** İşlevselliği kalıtım ile değil, composition ile sağlar.
+
+* Decorator ile çalışma zamanında bir nesneye (sınıfa değil) işlevsellik eklenebilir.
+** Gereksinim ve seçime göre bu özelleştirilmiş işlevsellik, tek bir nesneye uygulanabilir.
+
+### Senaryo
+
+Örnek olarak `writeData()` ve `readData()` metotlarını içeren bir `DataSource` arayüzünü düşünelim.
+
+* Daha sonra bu arayüzü implement eden farklı veri tiplerine sahip sınıflar olsun.
+** İlgili veri kaynakları, *daha spesifik* özelliklere sahiptir.
+
+* Oluşturulacak veri kaynaklarını bir adım daha özelliştirmeye çalışalım.
+** Veriyi önce *şifreleyelim*, daha sonra da *sıkıştırmak* isteyelim.
+** İlgili projede daha *fazla ekstra özelliştirme* yapılması gerektiğini varsayalım.
+
+### Problem
+
+* Nesne davranışını değiştirmek için ilk akla gelen, nesnenin daha büyük bir sınıftan miras alması gerektiğidir.
+** Kalıtım *statiktir.* Bir nesnenin çalışma zamanında davranışı değiştirilemez.
+** Kalıtım ile alt sınıflar, yalnızca bir sınıftan miras alabilir.
+*** Her programlama dili, çoklu kalıtımı desteklemez.
+*** Miras alınacak sınıf sayısının az olması, *nesnenin özelleştirilebilmesi* noktasında bir engeldir.
+
+### Çözüm
+
+* Miras yerine composition yapısı kullanılır.
+
+* Pattern, decorator sınıfları oluşturur.
+** Sınıf metotlarının imzasını değiştirmeden ek işlevsellik sağlar.
+
+.Decorator tasarım kalıbı UML şeması
+[uml,file="decorator_uml.png"]
+--
+@startuml
+left to right direction
+
+interface DataSource {
+    +void writeData()
+    +void readData()
+}
+
+abstract DataSourceDecorator {
+    #DataSource decoratedDataSource
+    +DataSourceDecorator(DataSource)
+}
+
+class CSVData {
+    
+}
+
+class XMLData {
+    
+}
+
+class EncDecorator {
+    +EncDecorator(DataSource)
+    -void applyEncryption(DataSource)
+}
+
+class CompressDecorator {
+    +CompressDecorator(DataSource)
+    -void compressFile()
+}
+
+CSVData ..|> DataSource
+XMLData ..|> DataSource
+
+EncDecorator --|> DataSourceDecorator
+CompressDecorator --|> DataSourceDecorator
+
+DataSourceDecorator *--> DataSource
+
+DataSourceDecorator..|> DataSource
+
+
+@enduml
+--
+
+.DataSource.java
+[source,java]
+....
+public interface DataSource { <1>
+	public void writeData();	
+
+	public void readData();
+}
+....
+<1> İlgili arayüzün iki adet metodu bulunmakta.
+
+.CSVData.java
+[source,java]
+....
+public class CSVData implements DataSource { <1>
+    // implemented methods...
+}
+....
+<1> Veri kaynağı daha spesifik oldu, CSV ve XML tipindeki veri kaynaklarımız mevcut.
+
+.DataSourceDecorator.java
+[source,java]
+....
+public abstract class DataSourceDecorator implements DataSource {	<1>
+	protected DataSource decoratedDataSource;
+	
+	public DataSourceDecorator(DataSource decoratedDataSource) {
+		super();
+		this.decoratedDataSource = decoratedDataSource;
+	}
+}
+....
+<1> Veri şifreleme, veri sıkıştırma için daha spesifik özellikler için, DatSource'yi implement eden bir *Decorator* sınıfı oluşturuldu.
+
+.EncDecorator.java
+[source,java]
+....
+public class EncDecorator extends DataSourceDecorator {
+
+	public EncDecorator(DataSource decoratedDataSource) {
+		super(decoratedDataSource);
+	}
+	
+	@Override
+	public void writeData() {
+		decoratedDataSource.writeData();
+		applyEncryption(decoratedDataSource); <1>
+	}
+	
+	private void applyEncryption(DataSource decoratedDataSource) {
+		System.out.println("Data encrypted!");
+	}
+
+	// other implemented method.
+
+}
+....
+<1> Görüldüğü üzere, `writeData()` metodunu icra etmekle birlikte, ekstra olarak veri şifreleme işlemleri de gerçekleştirilmekte.
+
+.EncDecorator.java
+[source,java]
+....
+public class CompressDecorator extends DataSourceDecorator {
+
+	public CompressDecorator(DataSource decoratedDataSource) {
+		super(decoratedDataSource);
+	}
+
+	@Override
+	public void writeData() {
+		decoratedDataSource.writeData();
+		compressFile(); <1>
+
+	}
+
+	private void compressFile() {
+		System.out.println("File successfully compressed!");
+	}
+
+	// other implemented method.
+
+}
+....
+<1> Burada da, `writeData()` metodu ile birlikte veri sıkıştırma işlemi uygulanmıştır.
+
+.DecoratorDemo.java
+[source,java]
+....
+public static void main(String[] args) {
+
+	System.out.println("Creating decorated (encrypt and compress) source CSV file...");
+	DataSource decCsv = new EncDecorator(new CompressDecorator(new CSVData())); <1>
+	
+	decCsv.writeData();
+	}
+....
+
+Kodun çıktısı aşağıda verilmiştir.
+
+----
+Creating decorated (encrypt and compress) source CSV file...
+Writing used CSV data source.
+File successfully compressed!
+Data encrypted!
+----
+
+* Görüldüğü üzere, `DatSource`, `CSVData` ve `XMLData` çekirdek sınıflarında bir değişiklikte bulunulmadı.
+* Decorator sınıfları oluşturularak, bu üç sınıfın *davranışları özelleştirildi.*

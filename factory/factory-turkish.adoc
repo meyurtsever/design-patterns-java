@@ -1,0 +1,194 @@
+== 1.2. Factory Pattern
+
+Kalıtımsal ilişkileri olan nesnelerin üretilmesi amacıyla kullanılan bir yazılım tasarım kalıbıdır. İhtiyaç duyulan nesnelerin üretimi, factory metodu ile yapılır. Factory metotları genelde bir factory sınıfı içerisinde bulunur.
+
+Örnek olarak bir MMORPG oyun yapısını ele alalım. Karakter oluşturma ekranında çeşitli ırklar olacak ve her ırkın önde olduğu bazı noktalar olacaktır. Bu düzeni Factory Pattern ile gösterelim.
+
+.Factory Pattern UML Diyagramı
+[uml,file="factory_pattern.png"]
+--
+@startuml
+left to right direction
+abstract class Race
+class RaceFactory
+class Elves
+class Humans
+class Dwarves
+class Client
+
+abstract class Race {
+    -subspecies: string
+    -language: string
+    -location: string
+    -lifeSpan: int
+    +public abstract void initCharacter()
+    +public void displayRace()
+    +public getSubspecies()
+}
+
+class RaceFactory {
+    +public Race getRace (String raceType)
+}
+
+class Client {
+    +void main()
+}
+
+
+Elves..|>Race
+Humans..|>Race
+Dwarves..|>Race
+
+Client-->RaceFactory : istek
+
+RaceFactory-->Race : üretir
+
+--
+
+==== 1.2.1. Örnek: Irk soyut sınıfının oluşturulması
+
+.Race.java
+[source,java]
+....
+public abstract class Race {
+    
+    String subspecies;
+    String language;
+    String location;
+    int lifeSpan;
+    
+    public abstract void initCharacter();
+    
+    public void displayRace() {
+        System.out.println("");
+        System.out.println("Subspecies: " + getSubspecies());
+        System.out.println("Language(s): " + getLanguage());
+        System.out.println("Location(s): " + getLocation());
+        System.out.println("Average Life Span: " + getLifeSpan());
+        System.out.println("");
+        }
+    // other getter and setters...
+    }
+....
+
+==== 1.2.2. Soyut sınıfı miras alan ırkların oluşturulması.
+
+.Elves.java
+[source,java]
+....
+public class Elves extends Race {
+    
+    @Override
+    public void initCharacter() {      
+        System.out.println("Now inside Elves::initCharacter()");   
+        
+        // Set some predefined specs for Elves...
+        setSubspecies("Quarter-elves");
+    }
+}
+....
+
+.Humans.java
+[source,java]
+....
+public class Humans extends Race {
+
+    @Override
+    public void initCharacter() {
+        System.out.println("Now inside Humans::initCharacter()");
+        
+        // Set some predefined specs for Humans...
+        setSubspecies("Witchers");
+    }
+}
+....
+
+.Dwarves.java
+[source,java]
+....
+public class Dwarves extends Race{
+
+    @Override
+    public void initCharacter() {       
+        System.out.println("Now inside Dwarves::initCharacter()");   
+        
+        // Set some predefined specs for Dwarves...
+        setSubspecies("Polevik");
+    }
+}
+....
+
+==== 1.2.3. Verilen bilgilere göre sınıf nesnesi üretmek üzere factory sınıfının oluşturulması
+
+İhtiyaç duyulan nesnelerin üretimi bu factory sınıfı içerisinde yapılır.
+
+.RaceFactory.java
+[source,java]
+....
+public class RaceFactory {
+    
+    public Race getRace(String raceType) {
+        if(raceType == null) {
+            return null;
+        }
+        if (raceType.equalsIgnoreCase("ELVES")) {
+            return new Elves();
+        } else if (raceType.equalsIgnoreCase("HUMANS")) {
+            return new Humans();
+        } else if (raceType.equalsIgnoreCase("DWARVES")) {
+            return new Dwarves();
+        }
+        return null;
+    }
+}
+....
+
+==== 1.2.4. Client main sınıfından nesne üretmek için RaceFactory'nin kullanılması
+
+.Client.java
+[source,java]
+....
+public class Client {
+ 
+    public static void main(String[] args) {
+        RaceFactory raceFactory = new RaceFactory();
+        
+        Race race1 = raceFactory.getRace("ELVES");
+        race1.initCharacter();
+        race1.displayRace();
+        
+        Race race2 = raceFactory.getRace("HUMANS");
+        race2.initCharacter();
+        race2.displayRace();
+        
+        Race race3 = raceFactory.getRace("DWARVES");
+        race3.initCharacter();
+        race3.displayRace();
+    }
+}
+....
+
+==== 1.2.5. Çıktılar
+
+....
+Now inside Elves::initCharacter()
+
+Subspecies: Quarter-elves
+Language(s): Common Speech
+Location(s): Blue Mountains, Nilfgaardian Empire
+Average Life Span: 350
+
+Now inside Humans::initCharacter()
+
+Subspecies: Witchers
+Language(s): Common Language
+Location(s): All of the known World
+Average Life Span: 75
+
+Now inside Dwarves::initCharacter()
+
+Subspecies: Polevik
+Language(s): Common Language, Dwarvish
+Location(s): Mahakam
+Average Life Span: 180
+....

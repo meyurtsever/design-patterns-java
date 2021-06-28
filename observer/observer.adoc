@@ -1,0 +1,83 @@
+== 2.2. Observer Pattern
+
+Subject olarak adlandırılan, durumu (state) olan bir nesne olsun.
+
+Sistem içerisinde bu subject'in durumuna bağlı olan birkaç ya da daha fazla nesne olabilir.
+
+Bu nedenle, bağımlı nesneler, ilgili subject'in gözlemcisi (observer) olarak bu durumdan fayda sağlarlar: Subject'in durumuna bağlı oldukları için subject değişikliklerinin hepsinden haberdar olmaları yerinde bir çözüm olacaktır.
+
+=== Önerilen Yapı
+
+. Gözlemcilerin subject'e kaydet (abone yap).
+. Subject içerisinde bir değişiklik yaşandığında, **tüm aboneleri** bilgilendir.
+
+.Observer Pattern UML Diyagramı
+[uml,file="observer_pattern.png"]
+--
+@startuml
+
+interface Observer {
+    +void update(double, double)
+}
+
+interface Subject {
+    +void subscribe(Observer)
+    +void unsubscribe(Observer)
+    +void notifyObserver()
+}
+
+interface Runnable {
+
+}
+
+class SpecialTopic {
+    -ArrayList<Observer> observers
+    -double premiumPrice
+    -double excPackagePrice
+    +SpecialTopic()
+    +void setPremiumPrice(double)
+    +void setExcPackagePrice(double)
+}
+
+class PriceObserver {
+    -double premiumPrice
+    -double excPackagePrice
+    -{static} int observerIDTracker
+    -int observerID
+    +PriceObserver(Subject)
+    -void showPrices()
+
+}
+
+class ObserverMain {
+    -String priceToUpdate
+    -double newPrice
+    +ObserverMain(Subject, String, double)
+    +{static} void main(String[])
+}
+
+
+SpecialTopic ..|> Subject
+SpecialTopic -->"0..*"Observer 
+
+PriceObserver -->Subject : kullanır
+PriceObserver ..|> Observer
+
+ObserverMain ..|> Runnable
+ObserverMain --> Subject : kullanır
+
+@enduml
+--
+
+** **Subject:** Abone **eklemek** ve **çıkarmak** için kullanılan interfacedir.
+* **Subject::notifyObserver()** metodu ile **Observer::update()** metodu çağırılarak tüm abonelere durum değişikliği bildirilir.
+
+** **Observer:** Subject'ten bildirim alan tüm gözlemciler için bir arayüzdür. Buradaki **update** metodu ile fiyatlar güncellenir.
+
+** Fiyat ayarlama işlemi **ConcreateSubject** olan **SpecialTopic sınıfı** içerisinde yapılır.
+
+=== Avantajı
+
+** Loose coupling uygulanmış olur.
+
+* Subject'in, observerların yapısı hakkında herhangi bir bilgiye sahip olması gerekmemekte.
